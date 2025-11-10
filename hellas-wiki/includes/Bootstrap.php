@@ -6,6 +6,7 @@ use HellasWiki\Admin\DashboardWidget;
 use HellasWiki\Admin\ImportPage;
 use HellasWiki\Admin\Menu;
 use HellasWiki\Admin\WizardPage;
+use HellasWiki\CLI\Command as CLICommand;
 use HellasWiki\REST\ExportController;
 use HellasWiki\REST\GitHubWebhook;
 use HellasWiki\REST\HealthController;
@@ -15,6 +16,7 @@ use HellasWiki\REST\QueueController;
 use HellasWiki\REST\ResolveController;
 use HellasWiki\REST\SettingsController;
 use HellasWiki\REST\UpdateController;
+use HellasWiki\REST\SummaryController;
 use HellasWiki\Types\AbstractType;
 use HellasWiki\Types\AbilityType;
 use HellasWiki\Types\FormType;
@@ -82,6 +84,8 @@ Capabilities::init();
         WizardPage::init();
         ImportPage::init();
         DashboardWidget::init();
+
+        CLICommand::register();
 
 Search::init();
 Routing::init();
@@ -203,13 +207,13 @@ add_action(
 static function (): void {
 wp_enqueue_style( 'hellaswiki-frontend', HELLAS_WIKI_URL . 'assets/frontend.css', [], HELLAS_WIKI_VERSION );
 wp_enqueue_script( 'hellaswiki-tooltip', HELLAS_WIKI_URL . 'assets/tooltip.js', [ 'wp-api-fetch' ], HELLAS_WIKI_VERSION, true );
-wp_localize_script(
-'hellaswiki-tooltip',
-'hellasWikiTooltip',
-[
-'endpoint' => esc_url_raw( rest_url( 'hellaswiki/v1/resolve' ) ),
-]
-);
+            wp_localize_script(
+                'hellaswiki-tooltip',
+                'hellasWikiTooltip',
+                [
+                    'endpoint' => esc_url_raw( rest_url( 'hellaswiki/v1/summary' ) ),
+                ]
+            );
 }
 );
 }
@@ -227,6 +231,7 @@ public static function register_rest_controllers(): void {
             new SettingsController(),
             new HealthController(),
             new PollController(),
+            new SummaryController(),
         ];
 
 foreach ( $controllers as $controller ) {

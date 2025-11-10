@@ -27,13 +27,23 @@ protected $namespace = 'hellaswiki/v1';
  * Register routes.
  */
 public function register_routes() {
-register_rest_route(
-$this->namespace,
-'/import',
-[
-[ 'methods' => 'POST', 'callback' => [ $this, 'handle_import' ], 'permission_callback' => [ $this, 'permissions_check' ] ],
-]
-);
+        register_rest_route(
+            $this->namespace,
+            '/import',
+            [
+                [ 'methods' => 'POST', 'callback' => [ $this, 'handle_import' ], 'permission_callback' => [ $this, 'permissions_check' ] ],
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
+            '/import/parse',
+            [
+                'methods'             => 'POST',
+                'callback'            => [ $this, 'handle_parse' ],
+                'permission_callback' => [ $this, 'permissions_check' ],
+            ]
+        );
 }
 
 /**
@@ -46,9 +56,9 @@ return current_user_can( 'import_wiki_pages' );
 /**
  * Handle import request.
  */
-public function handle_import( WP_REST_Request $request ) {
-$post_type = sanitize_key( $request['post_type'] ?? '' );
-$payload   = json_decode( (string) $request->get_body(), true );
+    public function handle_import( WP_REST_Request $request ) {
+        $post_type = sanitize_key( $request['post_type'] ?? '' );
+        $payload   = json_decode( (string) $request->get_body(), true );
 
         if ( ! $post_type ) {
             Logger::error( 'Import attempted without post type.' );
@@ -103,5 +113,115 @@ $type = TypeRegistry::get( $post_type );
         Logger::info( 'Import successful.', [ 'post_id' => $post_id, 'post_type' => $post_type ] );
 
         return $post_id;
+    }
+
+    /**
+     * Parse a payload without persisting.
+     */
+    public function handle_parse( WP_REST_Request $request ): WP_REST_Response {
+        $params = $request->get_json_params();
+        $raw    = '';
+
+        if ( isset( $params['payload'] ) ) {
+            $raw = is_array( $params['payload'] ) ? wp_json_encode( $params['payload'] ) : (string) $params['payload'];
+        }
+
+        if ( ! $raw && ! empty( $params['url'] ) ) {
+            $url      = esc_url_raw( (string) $params['url'] );
+            $response = wp_remote_get( $url );
+
+            if ( is_wp_error( $response ) ) {
+                Logger::error( 'Parse test download failed.', [ 'url' => $url, 'error' => $response->get_error_message() ] );
+                return new WP_REST_Response( [ 'error' => 'download_failed' ], 400 );
+            }
+
+            $raw = (string) wp_remote_retrieve_body( $response );
+        }
+
+        if ( ! $raw ) {
+            return new WP_REST_Response( [ 'error' => 'missing_payload' ], 400 );
+        }
+
+        $payload = json_decode( $raw, true );
+
+        if ( ! is_array( $payload ) ) {
+            Logger::error( 'Parse test invalid JSON.' );
+            return new WP_REST_Response( [ 'error' => 'invalid_json' ], 400 );
+        }
+
+        $detected = self::detect_post_type_from_payload( $payload );
+
+        if ( ! $detected ) {
+            return new WP_REST_Response( [ 'error' => 'unknown_type' ], 400 );
+        }
+
+        /** @var AbstractType|null $type */
+        $type = TypeRegistry::get( $detected );
+
+        if ( ! $type ) {
+            return new WP_REST_Response( [ 'error' => 'type_not_registered' ], 400 );
+        }
+
+        $normalized = $type->normalize_payload( $payload );
+
+        if ( is_wp_error( $normalized ) ) {
+            return new WP_REST_Response(
+                [
+                    'error'   => $normalized->get_error_code(),
+                    'message' => $normalized->get_error_message(),
+                ],
+                400
+            );
+        }
+
+        $preview = [
+            'post_type'    => $detected,
+            'title'        => $normalized['post_title'] ?? '',
+            'slug'         => $normalized['post_name'] ?? '',
+            'meta'         => $normalized['meta'] ?? [],
+            'tax'          => $normalized['tax'] ?? [],
+            'description'  => $payload['description'] ?? $payload['flavourText'] ?? '',
+        ];
+
+        Logger::info( 'Parse test successful.', [ 'type' => $detected, 'title' => $preview['title'] ] );
+
+        return new WP_REST_Response( $preview, 200 );
+    }
+
+    /**
+     * Best-effort detection of target CPT from payload shape.
+     *
+     * @param array<string, mixed> $payload Payload data.
+     */
+    public static function detect_post_type_from_payload( array $payload ): ?string {
+        if ( isset( $payload['baseStats'] ) || isset( $payload['types'] ) ) {
+            return 'wiki_species';
+        }
+
+        if ( isset( $payload['formName'] ) || isset( $payload['baseForm'] ) ) {
+            return 'wiki_form';
+        }
+
+        if ( isset( $payload['category'] ) && isset( $payload['type'] ) ) {
+            return 'wiki_move';
+        }
+
+        if ( isset( $payload['effect'] ) && isset( $payload['name'] ) && isset( $payload['cooldown'] ) ) {
+            return 'wiki_ability';
+        }
+
+        if ( isset( $payload['item'] ) || isset( $payload['price'] ) ) {
+            return 'wiki_item';
+        }
+
+        if ( isset( $payload['region'] ) || isset( $payload['biomes'] ) ) {
+            return 'wiki_location';
+        }
+
+        if ( isset( $payload['steps'] ) || isset( $payload['sections'] ) ) {
+            return 'wiki_guide';
+        }
+
+        return null;
     }
 }

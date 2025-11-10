@@ -46,6 +46,48 @@ box-shadow: 0 0 12px rgba(255,132,87,0.4);
     border: 1px solid rgba(255,255,255,0.08);
 }
 
+.hellaswiki-health-card,
+.hellaswiki-parse-card {
+    margin-top: 32px;
+    padding: 24px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.hellaswiki-health-card h2,
+.hellaswiki-parse-card h2 {
+    margin-top: 0;
+    color: var(--forge-accent, #ff9457);
+}
+
+.hellaswiki-health-actions,
+.hellaswiki-parse-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.hellaswiki-health-card .spinner,
+.hellaswiki-parse-card .spinner {
+    visibility: hidden;
+}
+
+.hellaswiki-parse-card.is-busy .spinner,
+.hellaswiki-health-card.is-busy .spinner {
+    visibility: visible;
+}
+
+.hellaswiki-parse-output {
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 240px;
+    overflow: auto;
+    color: inherit;
+}
+
 .hellaswiki-update-card h2 {
     margin-top: 0;
     margin-bottom: 16px;

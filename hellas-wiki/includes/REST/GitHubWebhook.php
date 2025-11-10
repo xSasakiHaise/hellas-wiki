@@ -180,12 +180,16 @@ public function handle_webhook( WP_REST_Request $request ) {
  * Detect CPT based on GitHub file path.
  */
 protected function detect_type_from_path( string $path ): ?string {
-$map = [
-'src/main/resources/data/pixelmon/species/'     => 'wiki_species',
-'src/main/resources/data/hellasforms/moves/'     => 'wiki_move',
-'src/main/resources/data/hellasforms/abilities/' => 'wiki_ability',
-'src/main/resources/data/hellasforms/items/'     => 'wiki_item',
-];
+        $map = [
+            'src/main/resources/data/hellasforms/species/'   => 'wiki_species',
+            'src/main/resources/data/pixelmon/species/'      => 'wiki_species',
+            'src/main/resources/data/hellasforms/forms/'     => 'wiki_form',
+            'src/main/resources/data/hellasforms/moves/'     => 'wiki_move',
+            'src/main/resources/data/hellasforms/abilities/' => 'wiki_ability',
+            'src/main/resources/data/hellasforms/items/'     => 'wiki_item',
+            'src/main/resources/data/hellasforms/locations/' => 'wiki_location',
+            'src/main/resources/data/hellasforms/guides/'    => 'wiki_guide',
+        ];
 
 foreach ( $map as $prefix => $type ) {
 if ( 0 === strpos( $path, $prefix ) ) {

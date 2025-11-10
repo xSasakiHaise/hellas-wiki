@@ -19,6 +19,15 @@ get_header();
 <div class="entry-content">
 <?php the_content(); ?>
 </div>
+
+<?php
+echo \HellasWiki\Helpers::render_contextual_notes(
+    get_the_ID(),
+    'move',
+    [ 'move_explanation_html' ],
+    __( 'Move Notes', 'hellas-wiki' )
+);
+?>
 </article>
 </main>
 <?php

@@ -3,7 +3,7 @@
  * Plugin Name: Hellas Wiki
  * Plugin URI: https://github.com/HellasRegion/wiki
  * Description: Complete in-game encyclopedia for the Hellas Region project.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Hellas Forge Team
  * Text Domain: hellas-wiki
  * Requires PHP: 7.4
@@ -23,7 +23,7 @@ define( 'HELLAS_WIKI_URL', plugin_dir_url( __FILE__ ) );
 }
 
 if ( ! defined( 'HELLAS_WIKI_VERSION' ) ) {
-define( 'HELLAS_WIKI_VERSION', '1.1.0' );
+define( 'HELLAS_WIKI_VERSION', '1.2.0' );
 }
 
 require_once HELLAS_WIKI_PATH . 'includes/Bootstrap.php';

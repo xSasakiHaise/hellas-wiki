@@ -15,12 +15,18 @@ return;
 activeLink = link;
 const slug = link.dataset.slug || link.dataset.hellaswiki;
 const postType = link.dataset.postType;
+const id = link.dataset.id;
 
 try {
 const url = new URL(hellasWikiTooltip.endpoint);
-url.searchParams.set('slug', slug);
+if (id) {
+    url.searchParams.set('id', id);
+}
 if (postType) {
-url.searchParams.set('post_type', postType);
+    url.searchParams.set('type', postType.replace(/^wiki_/, ''));
+}
+if (!id && slug) {
+    url.searchParams.set('slug', slug);
 }
 
 const response = await fetch(url.toString());
