@@ -198,6 +198,8 @@
     function init() {
         initQueueActions();
         initUpdateCard();
+        initHealthCard();
+        initParseCard();
     }
 
     if (document.readyState === 'loading') {
@@ -206,3 +208,204 @@
         init();
     }
 })();
+
+function initHealthCard() {
+    if (!window.wp || !wp.apiFetch) {
+        return;
+    }
+
+    const container = document.querySelector('[data-hellaswiki-health]');
+
+    if (!container) {
+        return;
+    }
+
+    const repoEl = container.querySelector('[data-health-repo]');
+    const tokenEl = container.querySelector('[data-health-token]');
+    const pollerEl = container.querySelector('[data-health-poller]');
+    const lastPollEl = container.querySelector('[data-health-last-poll]');
+    const lastWebhookEl = container.querySelector('[data-health-last-webhook]');
+    const webhookStatusEl = container.querySelector('[data-health-webhook-status]');
+    const queueEl = container.querySelector('[data-health-queue]');
+    const nextCronEl = container.querySelector('[data-health-next-cron]');
+    const warningEl = container.querySelector('[data-health-warning]');
+    const pollBtn = container.querySelector('[data-health-poll]');
+    const flushBtn = container.querySelector('[data-health-flush]');
+
+    let busy = false;
+
+    function setBusy(next) {
+        busy = next;
+        container.classList.toggle('is-busy', busy);
+        if (pollBtn) {
+            pollBtn.disabled = busy;
+        }
+        if (flushBtn) {
+            flushBtn.disabled = busy;
+        }
+    }
+
+    function render(data) {
+        if (!data) {
+            return;
+        }
+
+        if (repoEl) {
+            repoEl.textContent = data.repo || '—';
+        }
+        if (tokenEl) {
+            tokenEl.textContent = data.token_present ? '✔︎' : '✘';
+        }
+        if (pollerEl) {
+            pollerEl.textContent = data.poller_enabled ? '✔︎' : '✘';
+        }
+        if (lastPollEl) {
+            lastPollEl.textContent = data.last_poll_at ? `${data.last_poll_at} (${data.last_poll_result || '—'})` : '—';
+        }
+        if (lastWebhookEl) {
+            lastWebhookEl.textContent = data.last_webhook_at || '—';
+        }
+        if (webhookStatusEl) {
+            webhookStatusEl.textContent = data.last_webhook_status || '—';
+        }
+        if (queueEl) {
+            queueEl.textContent = typeof data.queue_count !== 'undefined' ? data.queue_count : '0';
+        }
+        if (nextCronEl) {
+            nextCronEl.textContent = data.next_cron ? data.next_cron : '—';
+        }
+        if (warningEl) {
+            const warnings = [];
+            if (data.repo && data.repo.toLowerCase().endsWith('/hellas-wiki')) {
+                warnings.push('⚠️ Repository points to hellas-wiki. Switch to xSasakiHaise/hellasforms.');
+            }
+            if (data.cron_disabled) {
+                warnings.push('⚠️ DISABLE_WP_CRON is enabled. Ensure a real cron job calls wp-cron.php.');
+            }
+            warningEl.textContent = warnings.join(' ');
+        }
+    }
+
+    function fetchHealth() {
+        setBusy(true);
+        wp.apiFetch({ path: '/hellaswiki/v1/health?ts=' + Date.now() }).then(render).catch(() => {
+            if (warningEl) {
+                warningEl.textContent = 'Unable to fetch health data.';
+            }
+        }).finally(() => {
+            setBusy(false);
+        });
+    }
+
+    function runPoll() {
+        setBusy(true);
+        wp.apiFetch({
+            path: '/hellaswiki/v1/poll',
+            method: 'POST'
+        }).then(() => fetchHealth()).catch(() => {
+            window.alert('Poll failed. Check logs for details.');
+        }).finally(() => {
+            setBusy(false);
+        });
+    }
+
+    function flushRewrites() {
+        setBusy(true);
+        wp.apiFetch({
+            path: '/hellaswiki/v1/flush-rewrites',
+            method: 'POST'
+        }).then(() => {
+            window.alert('Rewrite rules flushed.');
+        }).catch(() => {
+            window.alert('Failed to flush rewrite rules.');
+        }).finally(() => {
+            setBusy(false);
+        });
+    }
+
+    if (pollBtn) {
+        pollBtn.addEventListener('click', runPoll);
+    }
+    if (flushBtn) {
+        flushBtn.addEventListener('click', flushRewrites);
+    }
+
+    fetchHealth();
+}
+
+function initParseCard() {
+    if (!window.wp || !wp.apiFetch) {
+        return;
+    }
+
+    const container = document.querySelector('[data-hellaswiki-parse]');
+
+    if (!container) {
+        return;
+    }
+
+    const urlInput = container.querySelector('[data-parse-url]');
+    const payloadInput = container.querySelector('[data-parse-payload]');
+    const runBtn = container.querySelector('[data-parse-run]');
+    const spinner = container.querySelector('[data-parse-spinner]');
+    const output = container.querySelector('[data-parse-output]');
+
+    let busy = false;
+
+    function setBusy(next) {
+        busy = next;
+        container.classList.toggle('is-busy', busy);
+        if (spinner) {
+            spinner.style.visibility = busy ? 'visible' : 'hidden';
+        }
+        if (runBtn) {
+            runBtn.disabled = busy;
+        }
+    }
+
+    function runParse() {
+        if (!runBtn) {
+            return;
+        }
+
+        const url = urlInput ? urlInput.value.trim() : '';
+        const payload = payloadInput ? payloadInput.value.trim() : '';
+
+        if (!url && !payload) {
+            window.alert('Provide a JSON payload or URL to test.');
+            return;
+        }
+
+        const data = {};
+        if (url) {
+            data.url = url;
+        }
+        if (payload) {
+            data.payload = payload;
+        }
+
+        setBusy(true);
+
+        wp.apiFetch({
+            path: '/hellaswiki/v1/import/parse',
+            method: 'POST',
+            data
+        }).then(response => {
+            if (output) {
+                output.textContent = JSON.stringify(response, null, 2);
+            }
+        }).catch(error => {
+            const message = error && error.message ? error.message : 'Parse failed.';
+            if (output) {
+                output.textContent = message;
+            }
+            window.alert(message);
+        }).finally(() => {
+            setBusy(false);
+        });
+    }
+
+    if (runBtn) {
+        runBtn.addEventListener('click', runParse);
+    }
+}

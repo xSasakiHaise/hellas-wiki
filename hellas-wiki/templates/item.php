@@ -19,6 +19,15 @@ $affects = (array) get_post_meta( get_the_ID(), 'item_affects', true );
 echo \HellasWiki\Helpers::render_badges( $affects );
 ?>
 </section>
+
+<?php
+echo \HellasWiki\Helpers::render_contextual_notes(
+    get_the_ID(),
+    'item',
+    [ 'item_explanation_html' ],
+    __( 'Item Notes', 'hellas-wiki' )
+);
+?>
 </div>
 </article>
 </main>

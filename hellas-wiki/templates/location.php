@@ -10,6 +10,15 @@ get_header();
 <div class="entry-content">
 <?php the_content(); ?>
 </div>
+
+<?php
+echo \HellasWiki\Helpers::render_contextual_notes(
+    get_the_ID(),
+    'location',
+    [ 'location_explanation_html' ],
+    __( 'Location Notes', 'hellas-wiki' )
+);
+?>
 </article>
 </main>
 <?php

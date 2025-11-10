@@ -140,6 +140,41 @@ public static function render_settings_page(): void {
 
 <?php submit_button(); ?>
 </form>
+<div class="hellaswiki-health-card" data-hellaswiki-health>
+    <h2><?php esc_html_e( 'Health', 'hellas-wiki' ); ?></h2>
+    <ul>
+        <li><strong><?php esc_html_e( 'Repository', 'hellas-wiki' ); ?>:</strong> <span data-health-repo>—</span></li>
+        <li><strong><?php esc_html_e( 'Token Present', 'hellas-wiki' ); ?>:</strong> <span data-health-token>—</span></li>
+        <li><strong><?php esc_html_e( 'Poller Enabled', 'hellas-wiki' ); ?>:</strong> <span data-health-poller>—</span></li>
+        <li><strong><?php esc_html_e( 'Last Poll', 'hellas-wiki' ); ?>:</strong> <span data-health-last-poll>—</span></li>
+        <li><strong><?php esc_html_e( 'Last Webhook', 'hellas-wiki' ); ?>:</strong> <span data-health-last-webhook>—</span></li>
+        <li><strong><?php esc_html_e( 'Webhook Status', 'hellas-wiki' ); ?>:</strong> <span data-health-webhook-status>—</span></li>
+        <li><strong><?php esc_html_e( 'Queue Count', 'hellas-wiki' ); ?>:</strong> <span data-health-queue>0</span></li>
+        <li><strong><?php esc_html_e( 'Next Cron', 'hellas-wiki' ); ?>:</strong> <span data-health-next-cron>—</span></li>
+    </ul>
+    <p class="description" data-health-warning></p>
+    <div class="hellaswiki-health-actions">
+        <button type="button" class="button button-primary" data-health-poll><?php esc_html_e( 'Run Poll Now', 'hellas-wiki' ); ?></button>
+        <button type="button" class="button" data-health-flush><?php esc_html_e( 'Flush Rewrite Rules', 'hellas-wiki' ); ?></button>
+    </div>
+</div>
+<div class="hellaswiki-parse-card" data-hellaswiki-parse>
+    <h2><?php esc_html_e( 'Manual Parse Test', 'hellas-wiki' ); ?></h2>
+    <p><?php esc_html_e( 'Paste a raw JSON payload (or provide a URL) to preview how it will import.', 'hellas-wiki' ); ?></p>
+    <label>
+        <?php esc_html_e( 'Raw JSON URL', 'hellas-wiki' ); ?>
+        <input type="url" class="large-text" data-parse-url placeholder="https://raw.githubusercontent.com/..." />
+    </label>
+    <label>
+        <?php esc_html_e( 'JSON Payload', 'hellas-wiki' ); ?>
+        <textarea rows="6" class="large-text code" data-parse-payload></textarea>
+    </label>
+    <div class="hellaswiki-parse-actions">
+        <button type="button" class="button" data-parse-run><?php esc_html_e( 'Run Parse Test', 'hellas-wiki' ); ?></button>
+        <span class="spinner" data-parse-spinner></span>
+    </div>
+    <pre class="hellaswiki-parse-output" data-parse-output></pre>
+</div>
 <div class="hellaswiki-update-card" data-hellaswiki-update>
     <h2><?php esc_html_e( 'Plugin Update', 'hellas-wiki' ); ?></h2>
     <p><strong><?php esc_html_e( 'Repository:', 'hellas-wiki' ); ?></strong> <span data-update-repo>—</span></p>

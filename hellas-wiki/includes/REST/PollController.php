@@ -29,7 +29,7 @@ class PollController extends WP_REST_Controller {
             [
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'handle_poll' ],
-                'permission_callback' => [ $this, 'permissions_check' ],
+                'permission_callback' => [ $this, 'can_poll' ],
             ]
         );
 
@@ -39,7 +39,7 @@ class PollController extends WP_REST_Controller {
             [
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'handle_flush_rewrites' ],
-                'permission_callback' => [ $this, 'permissions_check' ],
+                'permission_callback' => [ $this, 'can_flush' ],
             ]
         );
     }
@@ -48,7 +48,23 @@ class PollController extends WP_REST_Controller {
      * Capability check.
      */
     public function permissions_check(): bool {
+        _deprecated_function( __METHOD__, '1.2.0', __CLASS__ . '::can_poll' );
+
+        return $this->can_poll();
+    }
+
+    /**
+     * Capability check for polling.
+     */
+    public function can_poll(): bool {
         return current_user_can( 'edit_wiki_pages' );
+    }
+
+    /**
+     * Capability check for flushing rewrite rules.
+     */
+    public function can_flush(): bool {
+        return current_user_can( 'manage_options' );
     }
 
     /**

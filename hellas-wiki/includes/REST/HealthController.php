@@ -49,9 +49,15 @@ class HealthController extends WP_REST_Controller {
         $queue     = get_option( 'hellaswiki_import_queue', [] );
         $queue_cnt = is_array( $queue ) ? count( $queue ) : 0;
 
+        $token    = $settings['github_token'] ?? '';
+        $fallback = get_option( 'hellaswiki_github_token', '' );
+
+        $next_cron = wp_next_scheduled( 'hellaswiki/github_poller' );
+
         $data = [
             'repo'                => $settings['github_repo'] ?? 'xSasakiHaise/hellasforms',
             'poller_enabled'      => ! empty( $settings['enable_poller'] ),
+            'token_present'       => ! empty( $token ) || ! empty( $fallback ),
             'last_poll_at'        => $snapshot['last_poll_at'],
             'last_poll_result'    => $snapshot['last_poll_result'],
             'last_webhook_status' => $snapshot['last_webhook_status'],
@@ -62,6 +68,7 @@ class HealthController extends WP_REST_Controller {
             'routes_ok'           => (bool) $snapshot['routes_ok'],
             'token_scope'         => $snapshot['token_scope'],
             'cron_disabled'       => defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON,
+            'next_cron'           => $next_cron ? wp_date( DATE_ATOM, $next_cron ) : null,
         ];
 
         return new WP_REST_Response( $data, 200 );

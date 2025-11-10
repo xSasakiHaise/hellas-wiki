@@ -30,6 +30,15 @@ $abilities = (array) get_post_meta( get_the_ID(), 'abilities', true );
 echo \HellasWiki\Helpers::render_badges( $abilities );
 ?>
 </section>
+
+<?php
+echo \HellasWiki\Helpers::render_contextual_notes(
+    get_the_ID(),
+    'species',
+    [ 'species_notes_html' ],
+    __( 'Species Notes', 'hellas-wiki' )
+);
+?>
 </div>
 </article>
 </main>
