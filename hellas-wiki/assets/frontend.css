@@ -1,0 +1,159 @@
+.hellas-wiki {
+--hw-card-bg: color-mix(in srgb,var(--forge-bg, #131621) 92%, black 8%);
+--hw-card-border: color-mix(in srgb,var(--forge-accent, #ff9457) 25%, transparent);
+color: var(--forge-text, #f2f3f8);
+}
+
+.hellas-wiki .hw-figure {
+float: right;
+margin: 0 0 16px 16px;
+max-width: 260px;
+}
+
+.hellas-wiki .hw-figure figure {
+background: color-mix(in srgb,var(--forge-bg, #131621) 80%, black 20%);
+border: 1px solid var(--hw-card-border);
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.hellas-wiki .hw-figure img {
+width: 100%;
+display: block;
+}
+
+.hellas-wiki .hw-figure figcaption {
+font-size: 12px;
+padding: 6px 8px;
+color: color-mix(in srgb,var(--forge-text, #f2f3f8) 85%, #aaa 15%);
+border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.hw-badges {
+list-style: none;
+padding: 0;
+display: flex;
+gap: 6px;
+flex-wrap: wrap;
+}
+
+.hw-badges li {
+background: color-mix(in srgb,var(--forge-accent, #ff9457) 35%, #1c1010 65%);
+color: var(--forge-text, #fff);
+padding: 4px 8px;
+border-radius: 999px;
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 0.06em;
+}
+
+.hellaswiki-infobox table {
+width: 100%;
+background: var(--hw-card-bg);
+border: 1px solid var(--hw-card-border);
+border-radius: 12px;
+overflow: hidden;
+margin-bottom: 16px;
+}
+
+.hellaswiki-infobox th,
+.hellaswiki-infobox td {
+padding: 8px 12px;
+border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.hellaswiki-infobox th {
+text-transform: uppercase;
+font-weight: 700;
+font-size: 11px;
+color: color-mix(in srgb,var(--forge-text, #f2f3f8) 75%, #bbb 25%);
+}
+
+.hellaswiki-infobox td {
+font-size: 13px;
+}
+
+.hellaswiki-stats {
+width: 100%;
+border-collapse: collapse;
+margin: 24px 0;
+background: var(--hw-card-bg);
+border-radius: 12px;
+overflow: hidden;
+}
+
+.hellaswiki-stats th,
+.hellaswiki-stats td {
+padding: 8px 12px;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.hellaswiki-stats th {
+background: color-mix(in srgb,var(--forge-accent, #ff9457) 25%, #140d0d 75%);
+}
+
+@media (max-width: 800px) {
+.hellas-wiki .hw-figure {
+float: none;
+margin: 0 0 12px;
+max-width: 100%;
+}
+}
+
+.hellaswiki-tooltip {
+position: absolute;
+background: color-mix(in srgb,var(--forge-bg, #131621) 95%, black 5%);
+border: 1px solid color-mix(in srgb,var(--forge-accent, #ff9457) 40%, transparent);
+border-radius: 12px;
+padding: 12px;
+color: var(--forge-text, #f2f3f8);
+box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+display: none;
+z-index: 9999;
+max-width: 260px;
+}
+
+.hellaswiki-tooltip ul {
+margin: 8px 0 0;
+padding: 0;
+list-style: none;
+}
+
+.hellaswiki-tooltip li {
+font-size: 12px;
+margin-bottom: 4px;
+}
+
+.hellaswiki-redlink {
+color: #ff6b6b;
+border-bottom: 1px dotted currentColor;
+cursor: pointer;
+}
+
+.hellaswiki-type-overview table {
+width: 100%;
+border-collapse: collapse;
+margin-bottom: 24px;
+}
+
+.hellaswiki-type-overview th,
+.hellaswiki-type-overview td {
+border: 1px solid rgba(255,255,255,0.08);
+padding: 6px;
+text-align: center;
+}
+
+.hellaswiki-type-overview .hw-grid {
+display: grid;
+gap: 16px;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.hellaswiki-type-overview .hw-card {
+background: var(--hw-card-bg);
+border: 1px solid var(--hw-card-border);
+padding: 16px;
+border-radius: 12px;
+box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}

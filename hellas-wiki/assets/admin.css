@@ -1,0 +1,39 @@
+.hellaswiki-admin {
+background: color-mix(in srgb,var(--forge-bg, #10131a) 90%, black 10%);
+color: var(--forge-text, #f5f6f7);
+padding: 24px;
+border-radius: 16px;
+box-shadow: 0 18px 36px rgba(0,0,0,0.4);
+}
+
+.hellaswiki-admin h1 {
+font-size: 26px;
+margin-bottom: 16px;
+color: var(--forge-accent, #ff9457);
+}
+
+.hellaswiki-admin table.widefat th,
+.hellaswiki-admin table.widefat td {
+background: transparent;
+color: inherit;
+}
+
+.hellaswiki-admin input,
+.hellaswiki-admin select,
+.hellaswiki-admin textarea {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,255,255,0.1);
+color: inherit;
+border-radius: 8px;
+padding: 8px 12px;
+}
+
+.hellaswiki-admin .button-primary {
+background: linear-gradient(135deg,var(--forge-accent, #ff9457), #ff6b3d);
+border: none;
+box-shadow: 0 0 12px rgba(255,132,87,0.4);
+}
+
+.hellaswiki-admin .hellaswiki-queue table button {
+margin-right: 4px;
+}
