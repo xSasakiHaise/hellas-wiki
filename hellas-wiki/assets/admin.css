@@ -35,5 +35,43 @@ box-shadow: 0 0 12px rgba(255,132,87,0.4);
 }
 
 .hellaswiki-admin .hellaswiki-queue table button {
-margin-right: 4px;
+    margin-right: 4px;
+}
+
+.hellaswiki-update-card {
+    margin-top: 32px;
+    padding: 24px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.hellaswiki-update-card h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--forge-accent, #ff9457);
+}
+
+.hellaswiki-update-card p {
+    margin: 6px 0;
+}
+
+.hellaswiki-update-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.hellaswiki-update-card .spinner {
+    visibility: hidden;
+    margin: 0;
+}
+
+.hellaswiki-update-card.is-busy .spinner {
+    visibility: visible;
+}
+
+.hellaswiki-update-card.has-update .button.button-primary {
+    box-shadow: 0 0 14px rgba(255,132,87,0.6);
 }

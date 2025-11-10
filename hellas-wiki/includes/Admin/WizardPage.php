@@ -105,8 +105,9 @@ $counter = get_option( 'hellaswiki_import_counter', 0 );
  * Render settings page.
  */
 public static function render_settings_page(): void {
-self::render_wrapper( 'settings', function () {
-$settings = get_option( 'hellaswiki_settings', [] );
+        self::render_wrapper( 'settings', function () {
+            $settings      = get_option( 'hellaswiki_settings', [] );
+            $releases_only = (bool) get_option( 'hellaswiki_updater_releases_only', 1 );
 ?>
 <form method="post" action="options.php" class="hellaswiki-settings">
 <?php settings_fields( 'hellaswiki_settings' ); ?>
@@ -127,13 +128,34 @@ $settings = get_option( 'hellaswiki_settings', [] );
 <th scope="row"><?php esc_html_e( 'Enable Poller', 'hellas-wiki' ); ?></th>
 <td><label><input type="checkbox" name="hellaswiki_settings[enable_poller]" value="1" <?php checked( ! empty( $settings['enable_poller'] ) ); ?> /> <?php esc_html_e( 'Run cron-based syncing every 10 minutes.', 'hellas-wiki' ); ?></label></td>
 </tr>
+<tr>
+<th scope="row"><?php esc_html_e( 'Use only GitHub releases', 'hellas-wiki' ); ?></th>
+<td>
+    <input type="hidden" name="hellaswiki_updater_releases_only" value="0" />
+    <label><input type="checkbox" name="hellaswiki_updater_releases_only" value="1" <?php checked( $releases_only ); ?> /> <?php esc_html_e( 'Prefer tagged releases when checking for plugin updates.', 'hellas-wiki' ); ?></label>
+    <p class="description"><?php esc_html_e( 'Disable to fall back to the default branch archive when no releases are published.', 'hellas-wiki' ); ?></p>
+</td>
+</tr>
 </table>
 
 <?php submit_button(); ?>
 </form>
+<div class="hellaswiki-update-card" data-hellaswiki-update>
+    <h2><?php esc_html_e( 'Plugin Update', 'hellas-wiki' ); ?></h2>
+    <p><strong><?php esc_html_e( 'Repository:', 'hellas-wiki' ); ?></strong> <span data-update-repo>—</span></p>
+    <p><strong><?php esc_html_e( 'Current Version:', 'hellas-wiki' ); ?></strong> <span data-update-current>—</span></p>
+    <p><strong><?php esc_html_e( 'Latest:', 'hellas-wiki' ); ?></strong> <span data-update-latest>—</span></p>
+    <p><strong><?php esc_html_e( 'Status:', 'hellas-wiki' ); ?></strong> <span data-update-status><?php esc_html_e( 'Checking…', 'hellas-wiki' ); ?></span></p>
+    <div class="hellaswiki-update-actions">
+        <button type="button" class="button" data-update-check><?php esc_html_e( 'Check for Update', 'hellas-wiki' ); ?></button>
+        <button type="button" class="button button-primary" data-update-run disabled><?php esc_html_e( 'Update Now', 'hellas-wiki' ); ?></button>
+        <span class="spinner" data-update-spinner></span>
+    </div>
+    <p class="description" data-update-description></p>
+</div>
 <?php
-}, 'manage_options' );
-}
+        }, 'manage_options' );
+    }
 
 /**
  * Handles wizard submission.

@@ -12,6 +12,7 @@ use HellasWiki\REST\ImportController;
 use HellasWiki\REST\QueueController;
 use HellasWiki\REST\ResolveController;
 use HellasWiki\REST\SettingsController;
+use HellasWiki\REST\UpdateController;
 use HellasWiki\Types\AbstractType;
 use HellasWiki\Types\AbilityType;
 use HellasWiki\Types\FormType;
@@ -68,12 +69,14 @@ self::register_autoloader();
 
 Helpers::init();
 Capabilities::init();
-TypeRegistry::init();
+        TypeRegistry::init();
 
-self::register_types();
-self::register_assets();
+        self::register_types();
+        self::register_assets();
 
-Menu::init();
+        UpdateController::register();
+
+        Menu::init();
 WizardPage::init();
 ImportPage::init();
 DashboardWidget::init();
@@ -172,17 +175,20 @@ add_action(
 'admin_enqueue_scripts',
 static function (): void {
 wp_enqueue_style( 'hellaswiki-admin', HELLAS_WIKI_URL . 'assets/admin.css', [], HELLAS_WIKI_VERSION );
-wp_enqueue_script( 'hellaswiki-admin', HELLAS_WIKI_URL . 'assets/admin.js', [ 'wp-element', 'wp-components' ], HELLAS_WIKI_VERSION, true );
-wp_localize_script(
-'hellaswiki-admin',
-'hellasWikiAdmin',
-[
-'rest'      => [
-'root'  => esc_url_raw( rest_url( 'hellaswiki/v1/' ) ),
-'nonce' => wp_create_nonce( 'wp_rest' ),
-],
-            'placeholders' => [
-                'species' => HELLAS_WIKI_URL . 'assets/placeholder-species.svg',
+            wp_enqueue_script( 'hellaswiki-admin', HELLAS_WIKI_URL . 'assets/admin.js', [ 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n' ], HELLAS_WIKI_VERSION, true );
+            wp_localize_script(
+                'hellaswiki-admin',
+                'hellasWikiAdmin',
+                [
+                    'rest'      => [
+                        'root'  => esc_url_raw( rest_url( 'hellaswiki/v1/' ) ),
+                        'nonce' => wp_create_nonce( 'wp_rest' ),
+                    ],
+                    'update'    => [
+                        'nonce' => wp_create_nonce( 'hellaswiki_update' ),
+                    ],
+                    'placeholders' => [
+                        'species' => HELLAS_WIKI_URL . 'assets/placeholder-species.svg',
                 'item'    => HELLAS_WIKI_URL . 'assets/placeholder-item.svg',
 ],
 ]
