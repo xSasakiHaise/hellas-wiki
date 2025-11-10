@@ -45,21 +45,42 @@ return $template;
 /**
  * Triggered by cron to poll GitHub.
  */
-public static function run_github_poller(): void {
-if ( ! current_user_can( 'import_wiki_pages' ) && ! wp_doing_cron() ) {
-return;
-}
+    public static function run_github_poller( bool $force = false ): void {
+        if ( ! $force && ! current_user_can( 'import_wiki_pages' ) && ! wp_doing_cron() ) {
+            return;
+        }
 
-$settings = get_option( 'hellaswiki_settings', [] );
-$token    = $settings['github_token'] ?? '';
-$repo     = $settings['github_repo'] ?? '';
+        $settings = get_option( 'hellaswiki_settings', [] );
+        $token    = $settings['github_token'] ?? '';
+        $repo     = $settings['github_repo'] ?? '';
 
-if ( empty( $token ) || empty( $repo ) ) {
-return;
-}
+        if ( empty( $settings['enable_poller'] ) && ! $force ) {
+            Logger::info( 'Poller skipped: disabled in settings.' );
+            Health::record_poll( 'disabled' );
+            return;
+        }
 
-GitHubWebhook::fetch_repository_changes( $repo, $token );
-}
+        if ( empty( $token ) || empty( $repo ) ) {
+            Logger::error( 'Poller skipped: missing credentials.', [ 'repo' => $repo ? 'configured' : 'empty' ] );
+            Health::record_poll( 'missing_credentials' );
+            return;
+        }
+
+        Logger::info( 'Poller starting.', [ 'repo' => $repo ] );
+        $count = GitHubWebhook::fetch_repository_changes( $repo, $token );
+        $queue = get_option( 'hellaswiki_import_queue', [] );
+        $size  = is_array( $queue ) ? count( $queue ) : 0;
+
+        Logger::info(
+            'Poller complete.',
+            [
+                'fetched'   => $count,
+                'queueSize' => $size,
+            ]
+        );
+
+        Health::record_poll( sprintf( 'queued:%d', $size ) );
+    }
 
 /**
  * Create a wiki post from parsed data.

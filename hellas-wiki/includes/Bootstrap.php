@@ -8,7 +8,9 @@ use HellasWiki\Admin\Menu;
 use HellasWiki\Admin\WizardPage;
 use HellasWiki\REST\ExportController;
 use HellasWiki\REST\GitHubWebhook;
+use HellasWiki\REST\HealthController;
 use HellasWiki\REST\ImportController;
+use HellasWiki\REST\PollController;
 use HellasWiki\REST\QueueController;
 use HellasWiki\REST\ResolveController;
 use HellasWiki\REST\SettingsController;
@@ -77,9 +79,9 @@ Capabilities::init();
         UpdateController::register();
 
         Menu::init();
-WizardPage::init();
-ImportPage::init();
-DashboardWidget::init();
+        WizardPage::init();
+        ImportPage::init();
+        DashboardWidget::init();
 
 Search::init();
 Routing::init();
@@ -216,14 +218,16 @@ wp_localize_script(
  * Register REST controllers.
  */
 public static function register_rest_controllers(): void {
-$controllers = [
-new ImportController(),
-new ExportController(),
-new GitHubWebhook(),
-new QueueController(),
-new ResolveController(),
-new SettingsController(),
-];
+        $controllers = [
+            new ImportController(),
+            new ExportController(),
+            new GitHubWebhook(),
+            new QueueController(),
+            new ResolveController(),
+            new SettingsController(),
+            new HealthController(),
+            new PollController(),
+        ];
 
 foreach ( $controllers as $controller ) {
 $controller->register_routes();
@@ -234,7 +238,8 @@ $controller->register_routes();
  * Register Gutenberg blocks.
  */
 public static function register_blocks(): void {
-Blocks\Infobox::register();
-Blocks\StatTable::register();
+        Blocks\Infobox::register();
+        Blocks\StatTable::register();
+        Blocks\TextSection::register();
 }
 }
