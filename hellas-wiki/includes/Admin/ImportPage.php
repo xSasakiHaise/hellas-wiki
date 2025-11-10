@@ -2,6 +2,8 @@
 
 namespace HellasWiki\Admin;
 
+use HellasWiki\Logger;
+
 use HellasWiki\REST\ImportController;
 use HellasWiki\TypeRegistry;
 
@@ -70,14 +72,15 @@ continue;
  * Handle import request.
  */
 public static function handle_import(): void {
-if ( ! current_user_can( 'import_wiki_pages' ) ) {
-wp_die( esc_html__( 'You do not have permission to import data.', 'hellas-wiki' ) );
-}
+        if ( ! current_user_can( 'import_wiki_pages' ) ) {
+            Logger::error( 'Import page access denied.' );
+            wp_die( esc_html__( 'You do not have permission to import data.', 'hellas-wiki' ) );
+        }
 
-check_admin_referer( 'hellaswiki_import_json', '_hw_import_nonce' );
+        check_admin_referer( 'hellaswiki_import_json', '_hw_import_nonce' );
 
-$post_type = sanitize_key( $_POST['post_type'] ?? '' );
-$json_url  = esc_url_raw( $_POST['json_url'] ?? '' );
+        $post_type = sanitize_key( $_POST['post_type'] ?? '' );
+        $json_url  = esc_url_raw( $_POST['json_url'] ?? '' );
 
 $data = null;
 
@@ -92,15 +95,17 @@ if ( empty( $data ) && ! empty( $_FILES['json_file']['tmp_name'] ?? '' ) ) {
 $data = file_get_contents( $_FILES['json_file']['tmp_name'] );
 }
 
-if ( empty( $data ) ) {
-wp_die( esc_html__( 'No JSON payload provided.', 'hellas-wiki' ) );
-}
+        if ( empty( $data ) ) {
+            Logger::error( 'Import failed: no payload.', [ 'url' => $json_url ] );
+            wp_die( esc_html__( 'No JSON payload provided.', 'hellas-wiki' ) );
+        }
 
-$payload = json_decode( $data, true );
+        $payload = json_decode( $data, true );
 
-if ( ! is_array( $payload ) ) {
-wp_die( esc_html__( 'Invalid JSON payload.', 'hellas-wiki' ) );
-}
+        if ( ! is_array( $payload ) ) {
+            Logger::error( 'Import failed: invalid JSON.', [ 'url' => $json_url ] );
+            wp_die( esc_html__( 'Invalid JSON payload.', 'hellas-wiki' ) );
+        }
 
 $controller = new ImportController();
 $result     = $controller->import_payload( $payload, $post_type );

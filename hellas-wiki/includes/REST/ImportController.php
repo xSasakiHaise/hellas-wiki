@@ -2,6 +2,8 @@
 
 namespace HellasWiki\REST;
 
+use HellasWiki\Logger;
+
 use HellasWiki\Routing;
 use HellasWiki\TypeRegistry;
 use HellasWiki\Types\AbstractType;
@@ -48,13 +50,15 @@ public function handle_import( WP_REST_Request $request ) {
 $post_type = sanitize_key( $request['post_type'] ?? '' );
 $payload   = json_decode( (string) $request->get_body(), true );
 
-if ( ! $post_type ) {
-return new WP_Error( 'hellaswiki_missing_type', __( 'Missing post type parameter.', 'hellas-wiki' ), [ 'status' => 400 ] );
-}
+        if ( ! $post_type ) {
+            Logger::error( 'Import attempted without post type.' );
+            return new WP_Error( 'hellaswiki_missing_type', __( 'Missing post type parameter.', 'hellas-wiki' ), [ 'status' => 400 ] );
+        }
 
-if ( ! is_array( $payload ) ) {
-return new WP_Error( 'hellaswiki_invalid_payload', __( 'Invalid JSON payload.', 'hellas-wiki' ), [ 'status' => 400 ] );
-}
+        if ( ! is_array( $payload ) ) {
+            Logger::error( 'Import payload not array.', [ 'type' => $post_type ] );
+            return new WP_Error( 'hellaswiki_invalid_payload', __( 'Invalid JSON payload.', 'hellas-wiki' ), [ 'status' => 400 ] );
+        }
 
 $result = $this->import_payload( $payload, $post_type );
 
@@ -75,24 +79,29 @@ public function import_payload( array $payload, string $post_type ) {
 /** @var AbstractType|null $type */
 $type = TypeRegistry::get( $post_type );
 
-if ( ! $type ) {
-return new WP_Error( 'hellaswiki_unknown_type', __( 'Unknown post type.', 'hellas-wiki' ) );
-}
+        if ( ! $type ) {
+            Logger::error( 'Import failed: unknown type.', [ 'post_type' => $post_type ] );
+            return new WP_Error( 'hellaswiki_unknown_type', __( 'Unknown post type.', 'hellas-wiki' ) );
+        }
 
-$normalized = $type->normalize_payload( $payload );
+        $normalized = $type->normalize_payload( $payload );
 
-if ( is_wp_error( $normalized ) ) {
-return $normalized;
-}
+        if ( is_wp_error( $normalized ) ) {
+            Logger::error( 'Payload normalization failed.', [ 'post_type' => $post_type, 'error' => $normalized->get_error_code() ] );
+            return $normalized;
+        }
 
-$post_id = Routing::upsert_from_payload( $normalized );
+        $post_id = Routing::upsert_from_payload( $normalized );
 
-if ( ! $post_id ) {
-return new WP_Error( 'hellaswiki_import_failed', __( 'Could not create wiki entry.', 'hellas-wiki' ) );
-}
+        if ( ! $post_id ) {
+            Logger::error( 'Import upsert failed.', [ 'post_type' => $post_type ] );
+            return new WP_Error( 'hellaswiki_import_failed', __( 'Could not create wiki entry.', 'hellas-wiki' ) );
+        }
 
-do_action( 'hellaswiki_after_import_create', $post_id, $normalized );
+        do_action( 'hellaswiki_after_import_create', $post_id, $normalized );
 
-return $post_id;
-}
+        Logger::info( 'Import successful.', [ 'post_id' => $post_id, 'post_type' => $post_type ] );
+
+        return $post_id;
+    }
 }
